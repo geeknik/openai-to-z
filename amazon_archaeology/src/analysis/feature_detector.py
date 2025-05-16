@@ -21,7 +21,8 @@ from skimage import filters, feature, morphology, segmentation
 from ..config import (
     INITIAL_REGION_BOUNDS,
     SAMPLE_RESOLUTION,
-    DATA_DIR
+    DATA_DIR,
+    LIDAR_DATA_PATH
 )
 from ..utils.cache import cache_result
 
@@ -45,19 +46,64 @@ def detect_geometric_features(
         lidar_path: Path to LiDAR GeoTIFF
         min_size: Minimum feature size in meters
         max_size: Maximum feature size in meters
-        shapes_to_detect: List of shapes to detect
+        shapes_to_detect: Which shape types to detect
         sensitivity: Detection sensitivity (0-1)
         
     Returns:
         List of detected features with metadata
     """
-    # Check if this is a guidance file rather than actual LiDAR data
-    if str(lidar_path).endswith('.guidance.txt'):
-        logger.info(f"Guidance file provided instead of LiDAR data: {lidar_path}")
-        logger.info("Skipping feature detection for guidance files.")
-        return []
-        
     try:
+        lidar_path = Path(lidar_path)
+        
+        # Check if we have a guidance file instead of actual data
+        if str(lidar_path).endswith('.guidance.txt'):
+            logger.info(f"Guidance file provided instead of LiDAR data: {lidar_path}")
+            logger.info(f"Skipping feature detection for guidance files.")
+            
+            # Print the guidance file contents
+            try:
+                with open(lidar_path, 'r') as f:
+                    logger.info(f"Guidance file contents (first 10 lines):")
+                    for i, line in enumerate(f):
+                        if i < 10:
+                            logger.info(f"  {line.strip()}")
+                        else:
+                            break
+                            
+                # Try to fall back to SRTM data for this region
+                from ..preprocessing.data_fetcher import download_nasa_srtm
+                
+                # Extract bounds from guidance filename
+                # Filename format: amazon_lidar_dataset_id_min_lon_min_lat_max_lon_max_lat_resolution.guidance.txt
+                parts = lidar_path.name.split('_')
+                if len(parts) >= 8:
+                    try:
+                        # Parse bounds from filename
+                        min_lon = float(parts[-6])
+                        min_lat = float(parts[-5])
+                        max_lon = float(parts[-4])
+                        max_lat = float(parts[-3])
+                        resolution = parts[-2].replace('m', '')
+                        
+                        bounds = (min_lon, min_lat, max_lon, max_lat)
+                        logger.info(f"Extracted bounds from guidance filename: {bounds}")
+                        
+                        # Try to get SRTM data as a fallback
+                        srtm_filename = f"lidar_srtm_{min_lon}_{min_lat}_{max_lon}_{max_lat}_{resolution}m.tif"
+                        srtm_path = LIDAR_DATA_PATH / srtm_filename
+                        
+                        if os.path.exists(srtm_path):
+                            logger.info(f"Using existing SRTM data for feature detection: {srtm_path}")
+                            return detect_geometric_features(srtm_path, min_size, max_size, shapes_to_detect, sensitivity)
+                        else:
+                            logger.info(f"No SRTM fallback available. Returning empty feature list.")
+                    except (ValueError, IndexError) as e:
+                        logger.error(f"Error parsing bounds from guidance filename: {e}")
+            except Exception as e:
+                logger.error(f"Error reading guidance file: {e}")
+                
+            return []
+        
         # Open LiDAR raster
         with rasterio.open(lidar_path) as src:
             # Read elevation data

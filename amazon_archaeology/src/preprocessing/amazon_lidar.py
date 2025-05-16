@@ -1020,6 +1020,21 @@ def download_amazon_lidar_sample(
         logger.error(f"Unknown Amazon LiDAR dataset ID: {dataset_id}")
         return None
     
+    # If a region name is provided, use the bounds for that specific region
+    if region_name:
+        region_bounds = None
+        for region in dataset["regions"]:
+            if region["name"].lower() == region_name.lower():
+                logger.info(f"Found matching region: {region_name} with bounds {region['bounds']}")
+                region_bounds = region["bounds"]
+                break
+        
+        if region_bounds:
+            bounds = region_bounds
+            logger.info(f"Using region-specific bounds for {region_name}: {bounds}")
+        else:
+            logger.warning(f"Region name '{region_name}' not found in dataset {dataset_id}, using provided bounds")
+    
     # Generate output path if not provided
     if output_path is None:
         # Create a safe filename based on bounds and dataset

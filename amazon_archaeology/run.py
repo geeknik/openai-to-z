@@ -279,6 +279,36 @@ def verify_coordinate(lat: float, lon: float, radius: int = 500):
 
 def run_analysis(args):
     """Run the archaeological site analysis pipeline"""
+    
+    # Get cached data locations
+    lidar_path = None
+    satellite_path = None
+    
+    # Initialize logger
+    logger = logging.getLogger(__name__)
+    
+    # Initialize SRTM and Sentinel image fetchers
+    try:
+        from src.preprocessing.data_fetcher import (
+            get_data_sources_for_region,
+            fetch_lidar_metadata, 
+            download_sample_lidar,
+            download_nasa_srtm,
+            fetch_sentinel_imagery
+        )
+        
+        # Import Amazon LiDAR modules if available
+        try:
+            from src.preprocessing.amazon_lidar import (
+                download_amazon_lidar_sample,
+                AMAZON_LIDAR_SOURCES
+            )
+        except ImportError:
+            logger.warning("Amazon LiDAR module not available")
+    except ImportError as e:
+        logger.error(f"Failed to import required modules: {e}")
+        sys.exit(1)
+    
     # Clear cache if requested
     if args.clear_cache:
         count = clear_cache()
@@ -293,9 +323,6 @@ def run_analysis(args):
         return
     
     # Get data paths
-    lidar_path = None
-    satellite_path = None
-    
     if args.use_example_data:
         # Use example data
         logger.info("Using example data")
@@ -348,6 +375,24 @@ def run_analysis(args):
             bounds = INITIAL_REGION_BOUNDS
             logger.info(f"Using default region bounds: {bounds}")
         
+        # Check if we have an Amazon region specified and update bounds
+        if args.amazon_lidar and args.amazon_region:
+            try:
+                from src.preprocessing.amazon_lidar import AMAZON_LIDAR_SOURCES
+                
+                # Find the dataset
+                for source in AMAZON_LIDAR_SOURCES:
+                    if source["id"] == args.amazon_lidar:
+                        # Find the region
+                        for region in source["regions"]:
+                            if region["name"].lower() == args.amazon_region.lower():
+                                # Update bounds to the region-specific bounds
+                                bounds = region["bounds"]
+                                logger.info(f"Updated bounds to match Amazon region '{args.amazon_region}': {bounds}")
+                                break
+            except (ImportError, NameError) as e:
+                logger.warning(f"Could not use Amazon region bounds: {e}")
+        
         logger.info(f"Running discovery pipeline for region: {bounds}")
         
         # Get available data sources
@@ -369,7 +414,6 @@ def run_analysis(args):
             if amazon_datasets:
                 logger.info(f"Using specified Amazon LiDAR dataset: {args.amazon_lidar}")
                 try:
-                    from src.preprocessing.amazon_lidar import download_amazon_lidar_sample
                     lidar_path = download_amazon_lidar_sample(
                         args.amazon_lidar,
                         bounds,
@@ -402,15 +446,21 @@ def run_analysis(args):
                             print("To use the specialized Amazon LiDAR data, you need to download it manually")
                             print("following the instructions in the guidance file above.\n")
                             
-                            # Fall back to standard sources for analysis
-                            lidar_path = None
-                    else:
-                        # No data found and no guidance file created
-                        logger.warning(f"No Amazon LiDAR data available for dataset '{args.amazon_lidar}' in region {bounds}")
-                        print(f"\n⚠️ No Amazon LiDAR data available for dataset '{args.amazon_lidar}' in this region.")
-                        
-                        # Fall back to standard sources
-                        lidar_path = None
+                            # Fall back to SRTM data
+                            if sources["srtm"]["available"]:
+                                logger.info("Falling back to SRTM for elevation data")
+                                srtm_filename = f"lidar_srtm_{bounds[0]}_{bounds[1]}_{bounds[2]}_{bounds[3]}_{args.resolution}m.tif"
+                                srtm_path = LIDAR_DATA_PATH / srtm_filename
+                                lidar_path = download_nasa_srtm(bounds, srtm_path, args.resolution)
+                                
+                                if lidar_path and os.path.exists(lidar_path):
+                                    logger.info(f"Successfully downloaded SRTM elevation data to {lidar_path}")
+                                else:
+                                    logger.error("Failed to download SRTM elevation data")
+                                    lidar_path = None
+                            else:
+                                logger.warning("SRTM data not available for this region")
+                                lidar_path = None
                 except ImportError:
                     logger.error("Amazon LiDAR module not available")
             else:
@@ -560,44 +610,78 @@ def run_analysis(args):
     # Print summary
     print("\n📌 ====== DISCOVERY SUMMARY ======")
     print(f"Region: {bounds}")
-    print(f"Data sources: {'Elevation data ✓' if lidar_path else 'Elevation data ✗'}, "
-          f"{'Satellite imagery ✓' if satellite_path else 'Satellite imagery ✗'}")
-    print(f"Total potential archaeological sites: {len(merged_features)}")
+    print(f"Data sources: Elevation data {'✓' if lidar_path else '✗'}, Satellite imagery {'✓' if satellite_path else '✗'}")
     
     if len(merged_features) > 0:
-        high_confidence = len([f for f in merged_features if f["confidence"] >= 0.7])
-        medium_confidence = len([f for f in merged_features if 0.4 <= f["confidence"] < 0.7])
-        low_confidence = len([f for f in merged_features if f["confidence"] < 0.4])
+        high_count = len([f for f in merged_features if f["confidence"] >= 0.7])
+        medium_count = len([f for f in merged_features if 0.4 <= f["confidence"] < 0.7])
+        low_count = len([f for f in merged_features if f["confidence"] < 0.4])
         
-        print(f"Confidence levels:")
-        print(f"- High confidence (>= 0.7): {high_confidence}")
-        print(f"- Medium confidence (0.4-0.7): {medium_confidence}")
-        print(f"- Low confidence (< 0.4): {low_confidence}")
+        print(f"Total potential archaeological sites: {len(merged_features)}")
+        print("Confidence levels:")
+        print(f"- High confidence (>= 0.7): {high_count}")
+        print(f"- Medium confidence (0.4-0.7): {medium_count}")
+        print(f"- Low confidence (< 0.4): {low_count}")
         
-        # Show top 5 sites sorted by confidence
+        # Show top sites sorted by confidence
+        sorted_features = sorted(merged_features, key=lambda f: f["confidence"], reverse=True)
         print("\nTop potential archaeological sites:")
-        for i, feature in enumerate(sorted(merged_features, key=lambda f: f["confidence"], reverse=True)[:5]):
-            print(f"{i+1}. Type: {feature['type']}, Confidence: {feature['confidence']:.2f}, " +
-                  f"Coordinates: {feature['coordinates']['lon']:.5f}, {feature['coordinates']['lat']:.5f}, " +
+        top_n = min(5, len(merged_features))
+        for i, feature in enumerate(sorted_features[:top_n]):
+            print(f"{i+1}. Type: {feature['type']}, "
+                  f"Confidence: {feature['confidence']:.2f}, "
+                  f"Coordinates: {feature['coordinates']['lon']:.5f}, {feature['coordinates']['lat']:.5f}, "
                   f"Size: {feature['size']['area_m2']:.1f}m²")
+    else:
+        print("No potential archaeological sites detected.")
     
+    # Add explanatory information about what the data means
+    print("📚 ====== INTERPRETATION GUIDE ======")
+    print("What the results mean:")
+    print("• High confidence features (≥0.7): Likely archaeological structures based on distinctive geometric patterns")
+    print("• Medium confidence features (0.4-0.7): Possible archaeological structures requiring verification")
+    print("• Low confidence features (<0.4): Natural features or modern structures with some geometric properties\n")
+    
+    print("Feature types and significance:")
+    print("• Square/Rectangle: May indicate platforms, plazas, field systems, or habitation structures")
+    print("• Circle: Often associated with ceremonial spaces, communal structures, or agricultural features")
+    print("• Linear: Could represent roads, canals, defensive walls, or field boundaries\n")
+    
+    print("Archaeological context:")
+    print("• Amazonian archaeological sites often feature geometric earthworks, raised fields")
+    print("  and extensive settlements that are difficult to detect from the ground")
+    print("• Many sites date from 2,000-500 years ago, before European contact")
+    print("• LiDAR is especially valuable for detecting sites beneath forest canopy\n")
+    
+    if args.amazon_lidar:
+        print(f"Amazon dataset '{args.amazon_lidar}' insights:")
+        try:
+            from src.preprocessing.amazon_lidar import AMAZON_LIDAR_SOURCES
+            dataset_info = [d for d in AMAZON_LIDAR_SOURCES if d["id"] == args.amazon_lidar]
+            if dataset_info:
+                print(f"• This dataset covers {dataset_info[0]['name']}")
+                print(f"• Data collected {min(dataset_info[0].get('years', [2020]))}-{max(dataset_info[0].get('years', [2023]))}")
+                print(f"• For more information: {dataset_info[0]['url']}\n")
+        except (ImportError, NameError):
+            print(f"• More information available at the dataset source URL")
+            
     print("=================================\n")
+    
+    # Print next steps
     if saved_path:
         print(f"📄 Full results saved to: {saved_path}")
     
-    # For real-world data, provide further analysis suggestions
-    if not args.use_example_data:
-        print("\n📋 Next steps:")
-        print("1. Import these coordinates into QGIS or Google Earth for further analysis")
-        print("   (use --create-kml to generate Google Earth compatible files)")
-        print("2. Try analyzing neighboring regions to expand the search area")
-        print("3. Run with --visualize --sensitivity 0.7 for more precise detection")
-        print("4. Use --region parameter to explore other archaeological hotspots")
-        print("   (python run.py list-regions to see options)")
-        print("5. Explore specialized Amazon LiDAR datasets:")
-        print("   (python run.py list-amazon-datasets to see options)")
-        print("   python run.py analyze --amazon-lidar ornl_slb_2008_2018 --bounds=...")
-        print("6. Convert existing GeoJSON files to KML: python geojson_to_kml.py file path/to/file.geojson")
+    print("\n📋 Next steps:")
+    print("1. Import these coordinates into QGIS or Google Earth for further analysis")
+    print("   (use --create-kml to generate Google Earth compatible files)")
+    print("2. Try analyzing neighboring regions to expand the search area")
+    print("3. Run with --visualize --sensitivity 0.7 for more precise detection")
+    print("4. Use --region parameter to explore other archaeological hotspots")
+    print("   (python run.py list-regions to see options)")
+    print("5. Explore specialized Amazon LiDAR datasets:")
+    print("   (python run.py list-amazon-datasets to see options)")
+    print("   python run.py analyze --amazon-lidar ornl_slb_2008_2018 --bounds=...")
+    print("6. Convert existing GeoJSON files to KML: python geojson_to_kml.py file path/to/file.geojson")
     
     return merged_features
 
