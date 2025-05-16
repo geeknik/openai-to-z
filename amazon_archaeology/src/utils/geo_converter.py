@@ -8,6 +8,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union
+import tempfile
 
 try:
     from lxml import etree
@@ -22,18 +23,27 @@ try:
     import fiona
     from shapely.geometry import Point, Polygon, LineString
     
-    # Check for known issues with fiona path attribute
-    if not hasattr(fiona, 'path'):
-        raise AttributeError("Module 'fiona' has no attribute 'path'")
-    
-    # Test if geopandas is fully functional by creating a simple geodataframe
-    test_df = gpd.GeoDataFrame(
-        {"col1": [1]}, 
-        geometry=[Point(0, 0)]
-    )
-    GEOPANDAS_AVAILABLE = True
-    logging.info("GeoPandas is available and working correctly")
-except (ImportError, AttributeError) as e:
+    # Modified check for fiona - don't check for path attribute as it's not reliable on macOS
+    # Check for basic functionality instead
+    try:
+        # Create a simple test geodataframe to verify functionality
+        test_df = gpd.GeoDataFrame(
+            {"col1": [1]}, 
+            geometry=[Point(0, 0)]
+        )
+        # Try a simple save/load operation to verify fiona driver functionality
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir) / "test.geojson"
+            test_df.to_file(tmp_path, driver="GeoJSON")
+            test_load = gpd.read_file(tmp_path)
+            assert len(test_load) == 1  # Verify data was saved and loaded correctly
+        
+        GEOPANDAS_AVAILABLE = True
+        logging.info("GeoPandas is available and working correctly")
+    except Exception as e:
+        raise RuntimeError(f"GeoPandas/Fiona functionality test failed: {e}")
+        
+except (ImportError, RuntimeError) as e:
     logging.warning(f"GeoPandas not available or not fully functional: {e}")
     logging.warning("Using simple JSON parsing for GeoJSON conversion")
 

@@ -669,24 +669,35 @@ def merge_nearby_features(
         for feature in features
     ]
     
+    # Create initial GeoDataFrame with WGS84 coordinates
     gdf = gpd.GeoDataFrame(features, geometry=geometries, crs="EPSG:4326")
     
-    # Create buffer around each point (convert degrees to meters approximately)
-    # Note: This is a simplification, proper distance calculation would use a projected CRS
-    # 1 degree is approximately 111,000 meters at the equator
-    degree_buffer = max_distance_m / 111000
-    gdf["buffer"] = gdf.geometry.buffer(degree_buffer)
+    # Find an appropriate UTM zone for the area
+    # Most of Amazon is in UTM zones 18-23, but we'll calculate it dynamically
+    # Get the mean longitude to determine UTM zone
+    mean_lon = gdf.geometry.x.mean()
+    utm_zone = int(np.floor((mean_lon + 180) / 6) + 1)
+    
+    # Determine if we're in northern or southern hemisphere
+    mean_lat = gdf.geometry.y.mean()
+    epsg = 32600 + utm_zone if mean_lat >= 0 else 32700 + utm_zone
+    
+    # Project to the appropriate UTM zone for accurate distance measurements
+    gdf_utm = gdf.to_crs(epsg=epsg)
+    
+    # Now buffer in projected coordinates (actual meters)
+    gdf_utm["buffer"] = gdf_utm.geometry.buffer(max_distance_m)
     
     # Find overlapping buffers
     merged_features = []
     processed = set()
     
-    for i, feature in gdf.iterrows():
+    for i, feature in gdf_utm.iterrows():
         if i in processed:
             continue
             
         # Find overlapping features
-        overlaps = gdf[gdf["buffer"].intersects(feature["buffer"])].index.tolist()
+        overlaps = gdf_utm[gdf_utm["buffer"].intersects(feature["buffer"])].index.tolist()
         
         if len(overlaps) <= 1:
             # No overlaps, keep original feature
@@ -793,9 +804,11 @@ def save_features(
         for feature in features
     ]
     
+    # Create GeoDataFrame with correct CRS specified
     gdf = gpd.GeoDataFrame(features, geometry=geometries, crs="EPSG:4326")
     
-    # Save to file
+    # Save to file - GeoJSON standard requires WGS84 coordinates (EPSG:4326)
+    # No need to project for saving as GeoJSON
     gdf.to_file(output_path, driver="GeoJSON")
     logger.info(f"Saved {len(features)} features to {output_path}")
     
