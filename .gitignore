@@ -62,23 +62,36 @@ $RECYCLE.BIN/
 amazon_archaeology/data/amazon_archaeology.log
 
 # Large data files and generated content
-amazon_archaeology/data/detected_features_*.geojson
-amazon_archaeology/data/detected_features_*.kml
-amazon_archaeology/data/lidar/*.tif
-amazon_archaeology/data/lidar/*.las
-amazon_archaeology/data/lidar/*.laz
-amazon_archaeology/data/satellite/*.tif
-amazon_archaeology/data/satellite/*.jp2
-amazon_archaeology/data/satellite/*.jpg
-amazon_archaeology/data/satellite/*.png
+# Exclude all data files by default, only include essential examples
+amazon_archaeology/data/**/*.geojson
+amazon_archaeology/data/**/*.kml
+amazon_archaeology/data/**/*.tif
+amazon_archaeology/data/**/*.tiff
+amazon_archaeology/data/**/*.las
+amazon_archaeology/data/**/*.laz
+amazon_archaeology/data/**/*.jp2
+amazon_archaeology/data/**/*.jpg
+amazon_archaeology/data/**/*.jpeg
+amazon_archaeology/data/**/*.png
+amazon_archaeology/data/**/*.csv
+amazon_archaeology/data/**/*.zip
+amazon_archaeology/data/**/*.gz
+amazon_archaeology/data/**/*.tar
+amazon_archaeology/data/**/*.7z
+amazon_archaeology/data/satellite/
+amazon_archaeology/data/lidar/
 amazon_archaeology/data/cache/
+amazon_archaeology/data/visualizations/
+amazon_archaeology/data/detected_features_*
 
-# Keep example files and historical data for reference
-!amazon_archaeology/data/example_sites.geojson
-!amazon_archaeology/data/example_sites.kml
-!amazon_archaeology/data/example/*
-!amazon_archaeology/data/historical/*
-!amazon_archaeology/data/high_confidence_geoglyphs.geojson
+# Keep only minimal example files for reference
+!amazon_archaeology/data/example/**
+!amazon_archaeology/data/example/README.md
+
+# Exclude large example files even in example directory
+amazon_archaeology/data/example/**/*.tif
+amazon_archaeology/data/example/**/*.las
+amazon_archaeology/data/example/**/*.laz
 
 # Sensitive information (credentials and API keys)
 credentials.json
