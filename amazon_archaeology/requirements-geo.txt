@@ -7,6 +7,8 @@ lxml>=4.9.3
 # Optional: Advanced geospatial libraries for better KML conversion
 # These are not required but provide better handling of geometry
 geopandas>=0.14.0
+# Version 1.9.5 of Fiona may have issues with the 'path' attribute on macOS
+# Using a newer version should resolve this issue
 fiona>=1.9.5
 pyproj>=3.6.1
 shapely>=2.0.2

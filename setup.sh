@@ -67,6 +67,21 @@ print_green "Installing optional dependencies for KML conversion..."
 pip install lxml
 
 # Check for geospatial dependencies
+print_green "Installing geospatial dependencies..."
+print_yellow "Note: Some macOS users may experience issues with Fiona's 'path' attribute."
+print_yellow "The system includes a fallback mechanism if these libraries aren't available."
+
+# On macOS, use brew to install GDAL first if it's available
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if command -v brew >/dev/null 2>&1; then
+        print_yellow "macOS detected. Installing GDAL via Homebrew for better compatibility..."
+        brew install gdal
+    else
+        print_yellow "macOS detected but Homebrew not found. Consider installing GDAL manually for better compatibility."
+    fi
+fi
+
+# Now install Python packages
 if pip install -r amazon_archaeology/requirements-geo.txt; then
     print_green "Successfully installed geospatial dependencies."
 else
