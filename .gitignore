@@ -61,6 +61,9 @@ $RECYCLE.BIN/
 *.lock
 amazon_archaeology/data/amazon_archaeology.log
 
+# Root-level data directory (generated output)
+/data/
+
 # Large data files and generated content
 # Exclude all data files by default, only include essential examples
 amazon_archaeology/data/**/*.geojson
