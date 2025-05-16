@@ -22,7 +22,7 @@ matplotlib==3.8.2
 plotly==5.18.0
 
 # NLP for Historical Text Analysis
-nltk==3.8.1
+nltk==3.9.1
 spacy==3.7.2
 
 # Utilities
