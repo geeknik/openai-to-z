@@ -160,9 +160,10 @@ Access the API documentation at: http://localhost:8000/docs
 This tool implements several strategies to minimize costs while maintaining performance:
 
 ### Data Management
-- **Free Data Sources**: Exclusively uses open-source satellite imagery (Sentinel), LiDAR (OpenTopography), and elevation data (SRTM)
+- **Free Data Sources**: Exclusively uses open-source satellite imagery (Sentinel), LiDAR (OpenTopography), specialized Amazon LiDAR datasets, and elevation data (SRTM)
 - **Caching System**: Prevents redundant downloads and processing
 - **Resolution Control**: Configurable sampling resolution to balance detail with resource usage
+- **Specialized Amazon Datasets**: Integration with high-resolution LiDAR data from research projects across the Brazilian Amazon
 
 ### API Usage
 - **Tiered Model Approach**:
@@ -201,6 +202,7 @@ amazon_archaeology/
 - [Design Document](DESIGN.md): Original design specification
 - [Implementation Details](IMPLEMENTATION.md): Implementation strategies and cost optimization
 - [KML Conversion](amazon_archaeology/docs/KML_CONVERSION.md): Guide for exporting to Google Earth
+- [Amazon LiDAR Datasets](amazon_archaeology/docs/AMAZON_LIDAR.md): Specialized datasets for the Amazon rainforest
 
 ## License
 

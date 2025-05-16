@@ -118,6 +118,37 @@ def list_archaeological_regions():
     print("        python run.py --region geoglyphs-acre  # Same region, using name")
     print("-" * 80)
 
+def list_amazon_lidar_datasets():
+    """Display available Amazon LiDAR datasets"""
+    try:
+        from src.preprocessing.amazon_lidar import AMAZON_LIDAR_SOURCES
+        
+        print("\nSpecialized Amazon LiDAR Datasets:")
+        print("-" * 100)
+        print(f"{'Dataset ID':<25} {'Name':<35} {'Description':<50}")
+        print("-" * 100)
+        
+        for source in AMAZON_LIDAR_SOURCES:
+            # Truncate long descriptions
+            description = source['description']
+            if len(description) > 47:
+                description = description[:44] + "..."
+                
+            print(f"{source['id']:<25} {source['name']:<35} {description:<50}")
+            
+            # Print regions within each dataset
+            for region in source['regions']:
+                bounds_str = f"({region['bounds'][0]:.1f},{region['bounds'][1]:.1f})-({region['bounds'][2]:.1f},{region['bounds'][3]:.1f})"
+                print(f"  - Region: {region['name']:<15} {bounds_str}")
+            print()
+        
+        print("-" * 100)
+        print("To use: python run.py analyze --amazon-lidar ornl_slb_2008_2018 --bounds=-55.0,-5.0,-54.0,-4.0")
+        print("        python run.py analyze --amazon-lidar ornl_manaus_2008 --amazon-region 'K34 Tower'")
+        print("-" * 100)
+    except ImportError:
+        print("\nAmazon LiDAR module not available")
+
 def create_example_data(example_dir: Path) -> Tuple[Path, Path]:
     """Create synthetic example data for testing"""
     import numpy as np
@@ -322,15 +353,76 @@ def run_analysis(args):
         # Get available data sources
         sources = get_data_sources_for_region(bounds)
         logger.info(f"Data sources available: LiDAR={sources['lidar']['available']}, " +
-                   f"Sentinel={sources['sentinel']['available']}, SRTM={sources['srtm']['available']}")
+                   f"Sentinel={sources['sentinel']['available']}, SRTM={sources['srtm']['available']}, " +
+                   f"Amazon LiDAR={sources['amazon_lidar']['available']}")
+        
+        # Log information about Amazon-specific LiDAR datasets if available
+        if sources['amazon_lidar']['available']:
+            logger.info(f"Found {sources['amazon_lidar']['count']} specialized Amazon LiDAR datasets for this region")
+            for idx, source in enumerate(sources['amazon_lidar']['sources']):
+                logger.info(f"Amazon Dataset {idx+1}: {source['name']} - {source['url']}")
         
         # Download sample data
-        if sources["lidar"]["available"]:
+        # Check if a specific Amazon LiDAR dataset was requested
+        if args.amazon_lidar and sources["amazon_lidar"]["available"]:
+            amazon_datasets = [s for s in sources["amazon_lidar"]["sources"] if s["id"] == args.amazon_lidar]
+            if amazon_datasets:
+                logger.info(f"Using specified Amazon LiDAR dataset: {args.amazon_lidar}")
+                try:
+                    from src.preprocessing.amazon_lidar import download_amazon_lidar_sample
+                    lidar_path = download_amazon_lidar_sample(
+                        args.amazon_lidar,
+                        bounds,
+                        None,
+                        args.resolution,
+                        args.amazon_region
+                    )
+                    if lidar_path:
+                        if lidar_path.suffix == '.tif':
+                            logger.info(f"Successfully downloaded Amazon LiDAR data to {lidar_path}")
+                            print(f"\n✅ Amazon LiDAR Dataset: {args.amazon_lidar}")
+                            print(f"Data successfully downloaded and processed for analysis.")
+                        elif lidar_path.suffix == '.guidance.txt':
+                            logger.info(f"Amazon LiDAR guidance created at: {lidar_path}")
+                            print(f"\n📘 Amazon LiDAR Dataset Information: {args.amazon_lidar}")
+                            print("Automatic download was not possible. Please follow the instructions in the guidance file.")
+                            
+                            # Print the contents of the guidance file for user convenience
+                            try:
+                                with open(lidar_path, 'r') as f:
+                                    guidance_content = f.read()
+                                    print("\n" + "-"*80)
+                                    print(guidance_content)
+                                    print("-"*80 + "\n")
+                            except Exception as e:
+                                logger.error(f"Error reading guidance file: {e}")
+                            
+                            # Inform the user that we're falling back to SRTM data
+                            print("\n⚠️ NOTE: We're proceeding with SRTM elevation data as a fallback.")
+                            print("To use the specialized Amazon LiDAR data, you need to download it manually")
+                            print("following the instructions in the guidance file above.\n")
+                            
+                            # Fall back to standard sources for analysis
+                            lidar_path = None
+                    else:
+                        # No data found and no guidance file created
+                        logger.warning(f"No Amazon LiDAR data available for dataset '{args.amazon_lidar}' in region {bounds}")
+                        print(f"\n⚠️ No Amazon LiDAR data available for dataset '{args.amazon_lidar}' in this region.")
+                        
+                        # Fall back to standard sources
+                        lidar_path = None
+                except ImportError:
+                    logger.error("Amazon LiDAR module not available")
+            else:
+                logger.warning(f"Specified Amazon LiDAR dataset '{args.amazon_lidar}' not found in available sources")
+        
+        # If we don't have a lidar path yet, try standard sources
+        if not lidar_path and sources["lidar"]["available"]:
             # Download LiDAR data for the first available dataset
             dataset_id = sources["lidar"]["sources"][0].get("datasetId", "default")
             logger.info(f"Downloading LiDAR data from dataset: {dataset_id}")
             lidar_path = download_sample_lidar(dataset_id, bounds)
-        else:
+        elif not lidar_path:
             # Fallback to SRTM if available
             if sources["srtm"]["available"]:
                 logger.info("No LiDAR data available, falling back to SRTM")
@@ -502,7 +594,10 @@ def run_analysis(args):
         print("3. Run with --visualize --sensitivity 0.7 for more precise detection")
         print("4. Use --region parameter to explore other archaeological hotspots")
         print("   (python run.py list-regions to see options)")
-        print("5. Convert existing GeoJSON files to KML: python geojson_to_kml.py file path/to/file.geojson")
+        print("5. Explore specialized Amazon LiDAR datasets:")
+        print("   (python run.py list-amazon-datasets to see options)")
+        print("   python run.py analyze --amazon-lidar ornl_slb_2008_2018 --bounds=...")
+        print("6. Convert existing GeoJSON files to KML: python geojson_to_kml.py file path/to/file.geojson")
     
     return merged_features
 
@@ -606,6 +701,14 @@ def main():
         action="store_true",
         help="Create a KML file for Google Earth visualization"
     )
+    analysis_parser.add_argument(
+        "--amazon-lidar",
+        help="Use a specific Amazon LiDAR dataset (e.g., ornl_slb_2008_2018, ornl_manaus_2008)"
+    )
+    analysis_parser.add_argument(
+        "--amazon-region",
+        help="Specify a particular region within the Amazon LiDAR dataset"
+    )
     
     # Verification command
     verify_parser = subparsers.add_parser("verify", help="Fetch high-resolution imagery for verification")
@@ -631,6 +734,9 @@ def main():
     # List regions command
     list_parser = subparsers.add_parser("list-regions", help="List pre-defined archaeological regions")
     
+    # List Amazon LiDAR datasets command
+    list_amazon_parser = subparsers.add_parser("list-amazon-datasets", help="List specialized Amazon LiDAR datasets")
+    
     # Parse arguments
     args = parser.parse_args()
     
@@ -651,6 +757,9 @@ def main():
             run_analysis(args)
     elif args.command == "list-regions":
         list_archaeological_regions()
+        return
+    elif args.command == "list-amazon-datasets":
+        list_amazon_lidar_datasets()
         return
     elif args.command == "verify":
         verify_coordinate(args.lat, args.lon, args.radius)

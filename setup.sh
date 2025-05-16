@@ -1,110 +1,113 @@
 #!/bin/bash
 # Setup script for the Amazon Archaeological Discovery Tool
 
-set -e  # Exit on any error
+# Print colored text
+print_green() {
+    echo -e "\033[0;32m$1\033[0m"
+}
 
-# Print header
-echo "===================================================="
-echo "Amazon Archaeological Discovery Tool - Setup Script"
-echo "===================================================="
-echo
+print_yellow() {
+    echo -e "\033[0;33m$1\033[0m"
+}
 
-# Create required directories
-echo "Creating required directories..."
+print_red() {
+    echo -e "\033[0;31m$1\033[0m"
+}
+
+print_blue() {
+    echo -e "\033[0;34m$1\033[0m"
+}
+
+# Display header
+print_blue "================================================="
+print_blue "    Amazon Archaeological Discovery Tool Setup    "
+print_blue "================================================="
+echo ""
+
+# Create necessary directories
+print_green "Creating required directories..."
 mkdir -p amazon_archaeology/data/lidar
 mkdir -p amazon_archaeology/data/satellite
-mkdir -p amazon_archaeology/data/cache
 mkdir -p amazon_archaeology/data/visualizations
-echo "✅ Directories created successfully"
-echo
+mkdir -p amazon_archaeology/data/cache
+mkdir -p amazon_archaeology/data/example
 
-# Setup Python environment
-echo "Setting up Python environment..."
-if [ -x "$(command -v python3)" ]; then
-    PYTHON_CMD="python3"
+# Create Python virtual environment
+if [ ! -d "venv" ]; then
+    print_green "Setting up Python virtual environment..."
+    python3 -m venv venv
+    
+    if [ $? -ne 0 ]; then
+        print_red "Error: Failed to create virtual environment."
+        print_yellow "Please ensure you have Python 3.8+ installed with venv support."
+        exit 1
+    fi
 else
-    PYTHON_CMD="python"
+    print_yellow "Using existing virtual environment."
 fi
-
-# Check Python version
-PY_VERSION=$($PYTHON_CMD -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-echo "Detected Python version: $PY_VERSION"
-
-# Create virtual environment
-echo "Creating virtual environment..."
-$PYTHON_CMD -m venv venv
-echo "✅ Virtual environment created"
 
 # Activate virtual environment
-echo "Activating virtual environment..."
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+print_green "Activating virtual environment..."
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+elif [ -f "venv/Scripts/activate" ]; then
     source venv/Scripts/activate
 else
-    source venv/bin/activate
+    print_red "Error: Could not find activation script for virtual environment."
+    exit 1
 fi
-echo "✅ Virtual environment activated"
 
 # Install dependencies
-echo "Installing dependencies..."
+print_green "Installing required Python packages..."
 pip install --upgrade pip
 pip install -r requirements.txt
-echo "✅ Core dependencies installed"
 
-# Ask about installing geo-specific dependencies
-echo
-echo "Do you want to install additional geo-specific dependencies for KML conversion?"
-echo "These are required for Google Earth integration."
-read -p "Install geo dependencies? (y/n): " INSTALL_GEO
+# Check if lxml is installed (required for KML conversion)
+print_green "Installing optional dependencies for KML conversion..."
+pip install lxml
 
-if [[ "$INSTALL_GEO" == "y" || "$INSTALL_GEO" == "Y" ]]; then
-    echo "Installing geo-specific dependencies..."
-    pip install -r amazon_archaeology/requirements-geo.txt
-    echo "✅ Geo dependencies installed"
+# Check for geospatial dependencies
+if pip install -r amazon_archaeology/requirements-geo.txt; then
+    print_green "Successfully installed geospatial dependencies."
 else
-    echo "Skipping geo dependencies. You can install them later with:"
-    echo "pip install -r amazon_archaeology/requirements-geo.txt"
+    print_yellow "Warning: Could not install some geospatial dependencies."
+    print_yellow "KML conversion will use a simplified method."
+    print_yellow "See README for more information on optional dependencies."
 fi
 
-# Copy environment file if it doesn't exist
-if [ ! -f .env ]; then
-    echo
-    echo "Setting up environment configuration..."
-    cp env.example .env
-    echo "✅ Environment configuration file created (.env)"
-    echo "   Edit this file to add your API keys if needed"
+# Set up environment file if not exists
+if [ ! -f "amazon_archaeology/.env" ]; then
+    print_green "Creating environment file..."
+    cp env.example amazon_archaeology/.env
+    print_yellow "Please edit amazon_archaeology/.env with your API keys."
 fi
-
-# Run a simple test to verify installation
-echo
-echo "Testing the installation..."
-$PYTHON_CMD -c "
-import sys
-sys.path.insert(0, 'amazon_archaeology')
-from src.config import DATA_DIR
-from src.utils.cache import clear_cache
-print('✅ Core modules loaded successfully')
-print(f'✅ Data directory is set to: {DATA_DIR}')
-"
 
 # Final instructions
-echo
-echo "===================================================="
-echo "Setup completed successfully! 🚀"
-echo "===================================================="
-echo
-echo "To get started, follow these steps:"
-echo
-echo "1. Activate the virtual environment (if not already activated):"
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    echo "   source venv/Scripts/activate"
-else
-    echo "   source venv/bin/activate"
-fi
-echo
-echo "2. Run the tool with example data:"
-echo "   python amazon_archaeology/run.py analyze --use-example-data --visualize"
-echo
-echo "3. See the README.md for more usage examples"
-echo
-echo "Happy archaeological discovery!"
-echo 
+echo ""
+print_green "Setup complete!"
+print_blue "================================================="
+print_blue "                  Next Steps                     "
+print_blue "================================================="
+print_yellow "1. Activate the virtual environment if not using this shell:"
+echo "   source venv/bin/activate  # Linux/Mac"
+echo "   .\\venv\\Scripts\\activate.bat  # Windows"
+echo ""
+
+print_yellow "2. Edit your API keys (if needed):"
+echo "   nano amazon_archaeology/.env"
+echo ""
+
+print_yellow "3. Run with example data to test:"
+echo "   python amazon_archaeology/run.py --use-example-data"
+echo ""
+
+print_yellow "4. Explore Amazon LiDAR datasets:"
+echo "   python amazon_archaeology/run.py list-amazon-datasets"
+echo ""
+
+print_yellow "5. View documentation:"
+echo "   less amazon_archaeology/docs/AMAZON_LIDAR.md"
+echo ""
+
+print_green "Happy archaeological discovery!"
+echo "" 

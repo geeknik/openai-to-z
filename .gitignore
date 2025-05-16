@@ -83,6 +83,7 @@ amazon_archaeology/data/lidar/
 amazon_archaeology/data/cache/
 amazon_archaeology/data/visualizations/
 amazon_archaeology/data/detected_features_*
+amazon_archaeology/data/**/*.guidance.txt
 
 # Keep only minimal example files for reference
 !amazon_archaeology/data/example/**
@@ -123,6 +124,6 @@ npm-debug.log*
 *.ini
 *.cfg
 !setup.cfg
-!.coveragerc 
+!.coveragerc
 rules.mdc
 .cursorrules

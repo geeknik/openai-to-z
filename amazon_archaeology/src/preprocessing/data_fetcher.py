@@ -389,17 +389,25 @@ def download_sample_lidar(
     dataset_id: str,
     bounds: Tuple[float, float, float, float],
     output_path: Optional[Path] = None,
-    resolution: int = SAMPLE_RESOLUTION
+    resolution: int = SAMPLE_RESOLUTION,
+    region_name: Optional[str] = None
 ) -> Optional[Path]:
     """
-    Download LiDAR data using OpenTopography API for the specified region.
+    Download LiDAR data for the specified region from various sources.
+    
+    Sources include:
+    - OpenTopography API (standard global datasets)
+    - NASA SRTM data (global elevation)
+    - Specialized Amazon LiDAR datasets (research-specific)
+    
     Falls back to SRTM data if the specific dataset_id is not available.
     
     Args:
-        dataset_id: OpenTopography dataset ID or 'srtm' for NASA SRTM data
+        dataset_id: Dataset ID (OpenTopography ID, 'srtm', or Amazon dataset ID)
         bounds: (min_lon, min_lat, max_lon, max_lat)
         output_path: Path to save the downloaded file (None for auto-generation)
         resolution: Output resolution in meters
+        region_name: Optional specific region name within a dataset
         
     Returns:
         Path to downloaded file or None if failed
@@ -435,6 +443,30 @@ def download_sample_lidar(
         else:
             logger.error(f"Failed to download SRTM data for region {bounds}")
             return None
+    
+    # Check if this is an Amazon-specific dataset
+    if dataset_id.startswith(('ornl_', 'zenodo_', 'embrapa_')):
+        try:
+            from .amazon_lidar import download_amazon_lidar_sample, get_amazon_lidar_metadata
+            
+            # Check if the dataset exists
+            metadata = get_amazon_lidar_metadata(dataset_id)
+            if metadata:
+                logger.info(f"Using specialized Amazon LiDAR dataset: {dataset_id}")
+                amazon_result = download_amazon_lidar_sample(
+                    dataset_id, 
+                    bounds, 
+                    output_path, 
+                    resolution,
+                    region_name
+                )
+                if amazon_result:
+                    logger.info(f"Amazon LiDAR data information available at {amazon_result}")
+                    return amazon_result
+                else:
+                    logger.warning(f"Failed to access Amazon LiDAR data, falling back to other sources")
+        except ImportError:
+            logger.warning("Amazon LiDAR module not available")
     
     # Try OpenTopography API for specific dataset
     api_url = "https://portal.opentopography.org/API/otCatalog"
@@ -813,6 +845,16 @@ def get_data_sources_for_region(
         bounds[1] >= -56 and bounds[3] <= 60  # SRTM covers latitude -56 to 60
     )
     
+    # Check for specialized Amazon LiDAR datasets
+    try:
+        from .amazon_lidar import get_amazon_lidar_sources_for_region
+        amazon_lidar_sources = get_amazon_lidar_sources_for_region(bounds)
+        amazon_lidar_available = len(amazon_lidar_sources) > 0
+    except ImportError:
+        logger.warning("Amazon LiDAR module not available")
+        amazon_lidar_sources = []
+        amazon_lidar_available = False
+    
     # Return combined metadata
     return {
         "lidar": {
@@ -825,6 +867,11 @@ def get_data_sources_for_region(
         },
         "srtm": {
             "available": srtm_available
+        },
+        "amazon_lidar": {
+            "available": amazon_lidar_available,
+            "sources": amazon_lidar_sources,
+            "count": len(amazon_lidar_sources)
         }
     }
 

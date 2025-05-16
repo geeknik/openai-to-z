@@ -51,6 +51,12 @@ def detect_geometric_features(
     Returns:
         List of detected features with metadata
     """
+    # Check if this is a guidance file rather than actual LiDAR data
+    if str(lidar_path).endswith('.guidance.txt'):
+        logger.info(f"Guidance file provided instead of LiDAR data: {lidar_path}")
+        logger.info("Skipping feature detection for guidance files.")
+        return []
+        
     try:
         # Open LiDAR raster
         with rasterio.open(lidar_path) as src:
