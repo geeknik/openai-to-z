@@ -1,0 +1,115 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+*.whl
+pip-wheel-metadata/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.env
+*.env~
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Mac specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Data files and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*~
+.~*#
+*.swp
+*.lock
+amazon_archaeology/data/amazon_archaeology.log
+
+# Large data files and generated content
+amazon_archaeology/data/detected_features_*.geojson
+amazon_archaeology/data/detected_features_*.kml
+amazon_archaeology/data/lidar/*.tif
+amazon_archaeology/data/lidar/*.las
+amazon_archaeology/data/lidar/*.laz
+amazon_archaeology/data/satellite/*.tif
+amazon_archaeology/data/satellite/*.jp2
+amazon_archaeology/data/satellite/*.jpg
+amazon_archaeology/data/satellite/*.png
+amazon_archaeology/data/cache/
+
+# Keep example files and historical data for reference
+!amazon_archaeology/data/example_sites.geojson
+!amazon_archaeology/data/example_sites.kml
+!amazon_archaeology/data/example/*
+!amazon_archaeology/data/historical/*
+!amazon_archaeology/data/high_confidence_geoglyphs.geojson
+
+# Sensitive information (credentials and API keys)
+credentials.json
+*secret*
+*api_key*
+*credentials*
+*token*
+!env.example
+
+# Documentation build files
+docs/_build/
+docs/api/
+
+# Test files
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Personal configuration files
+*.ini
+*.cfg
+!setup.cfg
+!.coveragerc 
+rules.mdc
+.cursorrules

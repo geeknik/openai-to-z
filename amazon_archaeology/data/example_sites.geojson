@@ -1,0 +1,86 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.45, -10.05]
+      },
+      "properties": {
+        "type": "geometric_feature",
+        "confidence": 0.85,
+        "coordinates": {
+          "lon": -67.45,
+          "lat": -10.05
+        },
+        "size": {
+          "width_m": 120,
+          "height_m": 120,
+          "area_m2": 14400
+        },
+        "shape": "rectangle",
+        "compactness": 0.92,
+        "metadata": {
+          "source": "lidar",
+          "detection_method": "geometric_feature",
+          "file": "lidar_sample.tif"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.47, -10.07]
+      },
+      "properties": {
+        "type": "vegetation_anomaly",
+        "confidence": 0.72,
+        "coordinates": {
+          "lon": -67.47,
+          "lat": -10.07
+        },
+        "size": {
+          "width_m": 85,
+          "height_m": 85,
+          "area_m2": 7225
+        },
+        "shape": "circle",
+        "compactness": 0.89,
+        "metadata": {
+          "source": "satellite",
+          "detection_method": "vegetation_anomaly",
+          "file": "sentinel_image.tif"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-67.43, -10.03]
+      },
+      "properties": {
+        "type": "geometric_feature",
+        "confidence": 0.45,
+        "coordinates": {
+          "lon": -67.43,
+          "lat": -10.03
+        },
+        "size": {
+          "width_m": 200,
+          "height_m": 50,
+          "area_m2": 10000
+        },
+        "shape": "linear",
+        "compactness": 0.32,
+        "metadata": {
+          "source": "lidar",
+          "detection_method": "geometric_feature",
+          "file": "lidar_sample.tif"
+        }
+      }
+    }
+  ]
+} 

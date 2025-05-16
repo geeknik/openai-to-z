@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Amazon Archaeological Sites</name>
+    <description>Potential archaeological sites detected by the Amazon Archaeological Discovery Tool</description>
+    <Style id="highConfidenceStyle">
+      <IconStyle>
+        <color>ff0000ff</color>
+        <scale>1.2</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/paddle/red-stars.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1.2</scale>
+      </LabelStyle>
+      <LineStyle>
+        <color>ff0000ff</color>
+        <width>2</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>80000080</color>
+        <outline>1</outline>
+        <fill>1</fill>
+      </PolyStyle>
+    </Style>
+    <Style id="mediumConfidenceStyle">
+      <IconStyle>
+        <color>ff00ffff</color>
+        <scale>1.0</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-stars.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1.0</scale>
+      </LabelStyle>
+      <LineStyle>
+        <color>ff00ffff</color>
+        <width>2</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>80008080</color>
+        <outline>1</outline>
+        <fill>1</fill>
+      </PolyStyle>
+    </Style>
+    <Style id="lowConfidenceStyle">
+      <IconStyle>
+        <color>ffffffff</color>
+        <scale>0.8</scale>
+        <Icon>
+          <href>http://maps.google.com/mapfiles/kml/paddle/wht-blank.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0.8</scale>
+      </LabelStyle>
+      <LineStyle>
+        <color>ffffffff</color>
+        <width>2</width>
+      </LineStyle>
+      <PolyStyle>
+        <color>80808080</color>
+        <outline>1</outline>
+        <fill>1</fill>
+      </PolyStyle>
+    </Style>
+    <Placemark>
+      <name>Geometric Feature (0.85)</name>
+      <description>&lt;![CDATA[&lt;h3&gt;Geometric Feature (0.85)&lt;/h3&gt;&lt;table border='1'&gt;&lt;tr&gt;&lt;td&gt;Coordinates&lt;/td&gt;&lt;td&gt;-10.05, -67.45&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Size&lt;/td&gt;&lt;td&gt;Width: 120m, Height: 120m, Area: 14400m²&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Shape&lt;/td&gt;&lt;td&gt;rectangle&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Confidence&lt;/td&gt;&lt;td&gt;0.85&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan='2'&gt;&lt;b&gt;Metadata&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;source&lt;/td&gt;&lt;td&gt;lidar&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;detection_method&lt;/td&gt;&lt;td&gt;geometric_feature&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;file&lt;/td&gt;&lt;td&gt;lidar_sample.tif&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;]]&gt;</description>
+      <styleUrl>#highConfidenceStyle</styleUrl>
+      <Point>
+        <coordinates>-67.45,-10.05,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Vegetation Anomaly (0.72)</name>
+      <description>&lt;![CDATA[&lt;h3&gt;Vegetation Anomaly (0.72)&lt;/h3&gt;&lt;table border='1'&gt;&lt;tr&gt;&lt;td&gt;Coordinates&lt;/td&gt;&lt;td&gt;-10.07, -67.47&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Size&lt;/td&gt;&lt;td&gt;Width: 85m, Height: 85m, Area: 7225m²&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Shape&lt;/td&gt;&lt;td&gt;circle&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Confidence&lt;/td&gt;&lt;td&gt;0.72&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan='2'&gt;&lt;b&gt;Metadata&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;source&lt;/td&gt;&lt;td&gt;satellite&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;detection_method&lt;/td&gt;&lt;td&gt;vegetation_anomaly&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;file&lt;/td&gt;&lt;td&gt;sentinel_image.tif&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;]]&gt;</description>
+      <styleUrl>#highConfidenceStyle</styleUrl>
+      <Point>
+        <coordinates>-67.47,-10.07,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Geometric Feature (0.45)</name>
+      <description>&lt;![CDATA[&lt;h3&gt;Geometric Feature (0.45)&lt;/h3&gt;&lt;table border='1'&gt;&lt;tr&gt;&lt;td&gt;Coordinates&lt;/td&gt;&lt;td&gt;-10.03, -67.43&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Size&lt;/td&gt;&lt;td&gt;Width: 200m, Height: 50m, Area: 10000m²&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Shape&lt;/td&gt;&lt;td&gt;linear&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Confidence&lt;/td&gt;&lt;td&gt;0.45&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan='2'&gt;&lt;b&gt;Metadata&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;source&lt;/td&gt;&lt;td&gt;lidar&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;detection_method&lt;/td&gt;&lt;td&gt;geometric_feature&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;file&lt;/td&gt;&lt;td&gt;lidar_sample.tif&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;]]&gt;</description>
+      <styleUrl>#mediumConfidenceStyle</styleUrl>
+      <Point>
+        <coordinates>-67.43,-10.03,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

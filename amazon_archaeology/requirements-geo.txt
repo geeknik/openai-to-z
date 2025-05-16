@@ -1,0 +1,16 @@
+# Additional geospatial dependencies for advanced features
+# Core dependencies are already in the main requirements.txt
+
+# XML processing for KML conversion (required)
+lxml>=4.9.3
+
+# Optional: Advanced geospatial libraries for better KML conversion
+# These are not required but provide better handling of geometry
+geopandas>=0.14.0
+fiona>=1.9.5
+pyproj>=3.6.1
+shapely>=2.0.2
+
+# Optional: Visualization in Google Earth
+# Not used by the converter but helpful for working with KML files
+simplekml>=1.3.6 

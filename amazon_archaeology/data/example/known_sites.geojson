@@ -1,0 +1,155 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fawcett's Rectangle",
+        "type": "geometric_earthwork",
+        "certainty": "high",
+        "year_discovered": 1921,
+        "description": "Rectangular earthwork approximately 200m x 200m with raised central platform and ceremonial path. Pottery fragments found within perimeter.",
+        "source": "Fawcett Expedition Journal, 1921"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.10, -3.05]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Roosevelt Complex",
+        "type": "geometric_complex",
+        "certainty": "high",
+        "year_discovered": 1987,
+        "description": "Complex of connected geometric shapes covering approximately 1 sq km. Predominantly circles and rectangles with a large central circular structure (diam. 100m) and radiating rectangular structures.",
+        "source": "Roosevelt Expedition Notes, 1987"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.00, -3.10]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Petersen Trapezoid",
+        "type": "platform_complex",
+        "certainty": "high",
+        "year_discovered": 2002,
+        "description": "Trapezoidal earth platform (80m at widest) with linear ridges extending in cardinal directions. Connected to circular depression (50m diam.) to the north.",
+        "source": "Petersen Field Notes, 2002"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-63.98, -2.97]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kamarakoto Circle",
+        "type": "settlement",
+        "certainty": "medium",
+        "year_discovered": 2013,
+        "description": "Circular earthwork with four entrances, reportedly containing multiple structures and a central 'sacred area'. Connected to other sites by straight paths.",
+        "source": "Oral History, recorded by Eduardo Neves, 2013"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.05, -3.03]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tuiuca Meeting Ground",
+        "type": "ceremonial",
+        "certainty": "low",
+        "year_discovered": 2013,
+        "description": "Geometric earthworks visible during dry season. Reportedly a trading and celebration site for multiple groups, with structures built on raised earth.",
+        "source": "Oral History, recorded by Eduardo Neves, 2013"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.00, -3.00]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aracá Geoglyphs",
+        "type": "geoglyph_complex",
+        "certainty": "high",
+        "year_discovered": 2006,
+        "description": "Complex of interconnected geometric ditches and berms forming precise shapes. Only visible via LiDAR or during extreme drought conditions.",
+        "source": "Brazilian Archaeological Survey, 2006"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.15, -2.95]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Javari Raised Fields",
+        "type": "agricultural",
+        "certainty": "high",
+        "year_discovered": 1998,
+        "description": "Extensive pre-Columbian agricultural system with raised fields, canals, and habitation mounds. Covers approximately 5 sq km.",
+        "source": "Amazonian Archaeology Project, 1998"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.08, -3.12]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Negro-Branco Junction Site",
+        "type": "multi_component",
+        "certainty": "medium",
+        "year_discovered": 2004,
+        "description": "Settlement complex with both residential and ceremonial areas. Features include earthen berms, middens, and evidence of long-term occupation.",
+        "source": "Amazon Deep History Project, 2004"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-63.95, -2.92]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Terra Preta Site Alpha",
+        "type": "habitation",
+        "certainty": "high",
+        "year_discovered": 1995,
+        "description": "Extensive area of anthropogenic dark earth (terra preta) indicating long-term settlement. Rich in pottery fragments and organic material.",
+        "source": "Woods and Denevan Survey, 1995"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-64.03, -3.08]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Circular Village Pattern Beta",
+        "type": "settlement",
+        "certainty": "medium",
+        "year_discovered": 2010,
+        "description": "Circular pattern of vegetation anomalies suggesting a ring village layout. Diameter approximately 120m with central plaza area.",
+        "source": "Amazon Basin Remote Sensing Project, 2010"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-63.92, -3.02]
+      }
+    }
+  ]
+} 
